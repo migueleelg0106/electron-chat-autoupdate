@@ -544,6 +544,21 @@ button:active {
   flex: 0 0 auto;
 }
 
+.emoji-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.emoji-bar button {
+  min-width: 42px;
+  min-height: 42px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  color: var(--accent-dark);
+  background: var(--soft);
+}
+
 @media (max-width: 900px) {
   body {
     overflow: auto;

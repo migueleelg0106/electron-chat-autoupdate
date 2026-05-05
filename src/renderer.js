@@ -15,6 +15,7 @@ const connectButton = document.querySelector('#connectButton');
 const contactsList = document.querySelector('#contactsList');
 const activeCount = document.querySelector('#activeCount');
 const networkStatus = document.querySelector('#networkStatus');
+const emojiButtons = document.querySelectorAll('[data-emoji]');
 
 const randomNames = [
   'Luna Rojas',
@@ -380,6 +381,13 @@ settingsToggleButton.addEventListener('click', () => {
 
 connectButton.addEventListener('click', () => {
   connectToRoom();
+});
+
+emojiButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    messageInput.value = `${messageInput.value} ${button.dataset.emoji}`.trim();
+    messageInput.focus();
+  });
 });
 
 window.chatApp.onUpdateStatus((message) => {
