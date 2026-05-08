@@ -502,6 +502,11 @@ button:active {
   background: color-mix(in srgb, var(--surface) 74%, var(--soft));
 }
 
+.message.ai {
+  border-color: color-mix(in srgb, var(--accent) 58%, var(--line));
+  background: color-mix(in srgb, var(--surface) 78%, var(--soft));
+}
+
 .message-author {
   display: block;
   margin-bottom: 6px;

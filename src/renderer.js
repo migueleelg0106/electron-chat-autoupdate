@@ -16,6 +16,8 @@ const contactsList = document.querySelector('#contactsList');
 const activeCount = document.querySelector('#activeCount');
 const networkStatus = document.querySelector('#networkStatus');
 const emojiButtons = document.querySelectorAll('[data-emoji]');
+const sendButton = chatForm.querySelector('button[type="submit"]');
+const GROQ_COMMAND = '@groq';
 
 const randomNames = [
   'Luna Rojas',
@@ -35,6 +37,7 @@ let socket = null;
 let localPeerId = null;
 let localName = '';
 let isConnectedToRoom = false;
+let isGeneratingGroqMessage = false;
 
 function addMessage(author, text, variant = '') {
   const message = document.createElement('article');
@@ -174,7 +177,8 @@ function setupDataChannel(peer, channel) {
     }
 
     if (payload.type === 'chat') {
-      addMessage(peer.name, payload.text);
+      const author = payload.source === 'groq' ? `${peer.name} + Groq` : peer.name;
+      addMessage(author, payload.text, payload.source === 'groq' ? 'ai' : '');
     }
   };
 }
@@ -333,25 +337,77 @@ function connectToRoom() {
 }
 
 function sendChatMessage(text) {
+  sendChatPayload({
+    type: 'chat',
+    text
+  });
+}
+
+function sendChatPayload(payload) {
   peers.forEach((peer) => {
     if (peer.channel?.readyState === 'open') {
-      peer.channel.send(JSON.stringify({
-        type: 'chat',
-        text
-      }));
+      peer.channel.send(JSON.stringify(payload));
     }
   });
+}
+
+function sendGroqMessage(text) {
+  sendChatPayload({
+    type: 'chat',
+    source: 'groq',
+    text
+  });
+}
+
+function getGroqPrompt(text) {
+  if (text.toLowerCase() === GROQ_COMMAND) {
+    return '';
+  }
+
+  if (text.toLowerCase().startsWith(`${GROQ_COMMAND} `)) {
+    return text.slice(GROQ_COMMAND.length).trim();
+  }
+
+  return null;
+}
+
+function setComposerLoading(isLoading) {
+  isGeneratingGroqMessage = isLoading;
+  messageInput.disabled = isLoading;
+  sendButton.disabled = isLoading;
+  sendButton.textContent = isLoading ? 'Pensando' : 'Enviar';
 }
 
 async function loadVersion() {
   appVersion.textContent = await window.chatApp.getVersion();
 }
 
-chatForm.addEventListener('submit', (event) => {
+chatForm.addEventListener('submit', async (event) => {
   event.preventDefault();
 
   const text = messageInput.value.trim();
-  if (!text) {
+  if (!text || isGeneratingGroqMessage) {
+    return;
+  }
+
+  const groqPrompt = getGroqPrompt(text);
+
+  if (groqPrompt !== null) {
+    addMessage('Tu', text, 'own');
+    messageInput.value = '';
+    setComposerLoading(true);
+
+    const response = await window.chatApp.askGroq(groqPrompt);
+    setComposerLoading(false);
+    messageInput.focus();
+
+    if (!response.ok) {
+      addMessage('Groq', response.error, 'system');
+      return;
+    }
+
+    addMessage('Groq', response.text, 'ai');
+    sendGroqMessage(response.text);
     return;
   }
 

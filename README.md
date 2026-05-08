@@ -17,11 +17,12 @@ codigo fuente
 
 ## Requisitos
 
-- Node.js 20 o superior
+- Node.js 24 recomendado
 - Git
 - GitHub CLI opcional
 - cuenta de GitHub
 - repositorio publico
+- llave de Groq para usar mensajes con IA
 
 ## Configuracion Inicial
 
@@ -94,12 +95,13 @@ En este modo la app debe abrir una ventana con el chat.
 
 Lo que el alumno debe verificar:
 
-- aparece la version `1.0.0`
+- aparece la version configurada en `package.json`
 - puede escribir su nombre
 - puede indicar la direccion del servidor local
 - puede usar la misma sala que el grupo
 - al conectarse otros equipos, aparecen en contactos
 - los mensajes se envian entre las apps conectadas
+- puede escribir `@groq escribe un saludo corto` para generar una respuesta con IA
 
 ### 5. Generar Instalador Local
 
@@ -233,6 +235,32 @@ npm run dist
 
 Esto genera el instalador en `dist`.
 
+## Mensajes Con Groq
+
+La app reconoce mensajes que empiezan con:
+
+```text
+@groq escribe un saludo para el grupo
+```
+
+El comando se procesa en el proceso principal de Electron usando `GROQ_API_KEY` desde `.env`. El archivo `.env` esta ignorado por Git para no subir la llave al repositorio.
+
+Para desarrollo local, crear `.env` en la raiz del proyecto:
+
+```text
+GROQ_API_KEY=tu_llave_de_groq
+GROQ_MODEL=llama-3.1-8b-instant
+```
+
+Para una app instalada, definir `GROQ_API_KEY` como variable de entorno del sistema o colocar un `.env` junto al ejecutable instalado. No se recomienda empacar la llave dentro del instalador porque cualquier usuario podria extraerla.
+
+Antes de publicar un release, confirmar esto:
+
+- `.env` no debe agregarse a Git.
+- la app instalada no trae una llave de Groq incluida.
+- cada equipo que quiera usar `@groq` necesita configurar su propia `GROQ_API_KEY`.
+- si la app solo se usara en una practica controlada, se puede colocar `.env` junto al ejecutable instalado en ese equipo.
+
 Para esta practica de laboratorio se desactiva la firma de codigo en Windows:
 
 ```json
@@ -252,17 +280,26 @@ v1.1.0
 v1.2.0
 ```
 
+Usar `v` minuscula para coincidir con el patron del workflow.
+
 Secuencia:
 
 ```powershell
 git add .
-git commit -m "Version inicial del chat"
-git tag -a v1.0.0 -m "Version 1.0.0"
+git commit -m "Agrega mensajes con Groq"
+git tag -a v1.1.4 -m "Version 1.1.4"
 git push origin main
-git push origin v1.0.0
+git push origin v1.1.4
 ```
 
 GitHub Actions construira el instalador y lo publicara como asset de GitHub Releases.
+
+Para publicar desde un repositorio que no es propio:
+
+- un repositorio publico solo permite leer el codigo; no permite hacer push ni crear tags si no eres colaborador.
+- si no tienes permiso de escritura, debes crear un fork, subir tu rama al fork y abrir un pull request hacia el repo original.
+- despues de que el dueno del repo haga merge, el dueno o un colaborador con permisos debe crear y subir el tag `v1.1.4`.
+- tambien puedes pedir al dueno del repo que te agregue como colaborador con permiso de escritura para poder ejecutar la secuencia anterior.
 
 ## Importante Sobre Tokens
 
