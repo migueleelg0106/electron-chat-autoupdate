@@ -287,9 +287,9 @@ Secuencia:
 ```powershell
 git add .
 git commit -m "Agrega mensajes con Groq"
-git tag -a v1.1.4 -m "Version 1.1.4"
+git tag -a v1.1.5 -m "Version 1.1.5"
 git push origin main
-git push origin v1.1.4
+git push origin v1.1.5
 ```
 
 GitHub Actions construira el instalador y lo publicara como asset de GitHub Releases.
@@ -298,7 +298,7 @@ Para publicar desde un repositorio que no es propio:
 
 - un repositorio publico solo permite leer el codigo; no permite hacer push ni crear tags si no eres colaborador.
 - si no tienes permiso de escritura, debes crear un fork, subir tu rama al fork y abrir un pull request hacia el repo original.
-- despues de que el dueno del repo haga merge, el dueno o un colaborador con permisos debe crear y subir el tag `v1.1.4`.
+- despues de que el dueno del repo haga merge, el dueno o un colaborador con permisos debe crear y subir el tag correspondiente, por ejemplo `v1.1.5`.
 - tambien puedes pedir al dueno del repo que te agregue como colaborador con permiso de escritura para poder ejecutar la secuencia anterior.
 
 ## Importante Sobre Tokens
