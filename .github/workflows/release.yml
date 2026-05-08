@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to publish, for example v1.1.5"
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -31,12 +37,18 @@ jobs:
       - name: Create GitHub Release with generated notes
         shell: pwsh
         run: |
+          $releaseTag = "${{ github.ref_name }}"
+
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            $releaseTag = "${{ inputs.tag }}"
+          }
+
           $assets = @(
             Get-ChildItem -Path dist -File -Filter "*.exe"
             Get-ChildItem -Path dist -File -Filter "*.blockmap"
             Get-ChildItem -Path dist -File -Filter "latest.yml"
           )
 
-          gh release create "${{ github.ref_name }}" @($assets.FullName) --title "${{ github.ref_name }}" --generate-notes
+          gh release create "$releaseTag" @($assets.FullName) --title "$releaseTag" --generate-notes
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
